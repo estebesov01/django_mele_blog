@@ -5,6 +5,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic import ListView
 from .forms import EmailPostForm, CommentForm
 from django.conf import settings
+from taggit.models import Tag
 
 
 class PostListView(ListView):
@@ -12,17 +13,26 @@ class PostListView(ListView):
     context_object_name = 'posts'
     paginate_by = 3
     template_name = 'blog/post/list.html'
-# def post_list(request):
-#     object_list = Post.published.all()
-#     paginator = Paginator(object_list, 3)
-#     page = request.GET.get('page')
-#     try:
-#         posts = paginator.page(page)
-#     except PageNotAnInteger:
-#         posts = paginator.page(1)
-#     except EmptyPage:
-#         posts = paginator.page(paginator.num_pages)
-#     return render(request, 'blog/post/list.html', {'page': page, 'posts': posts})
+
+
+
+def post_list(request, tag_slug=None):
+    object_list = Post.published.all()
+    tag = None
+
+    if tag_slug:
+        tag = get_object_or_404(Tag, slug=tag_slug)
+        object_list = object_list.filter(tags__in=[tag])
+    paginator = Paginator(object_list, 3)
+    page = request.GET.get('page')
+    try:
+        posts = paginator.page(page)
+    except PageNotAnInteger:
+        posts = paginator.page(1)
+    except EmptyPage:
+        posts = paginator.page(paginator.num_pages)
+    return render(request, 'blog/post/list.html', {'page': page, 'posts': posts,
+                                                   'tag': tag})
 
 
 # def post_list(request):
@@ -61,8 +71,8 @@ def post_share(request, post_id):
             # Form fields passed validation
             cd = form.cleaned_data
             post_url = request.build_absolute_uri(post.get_absolute_url())
-            subject = '{} ({}) recommends you reading "{}"'.format(cd['name'], cd['email'], post.title)
-            message = 'Read "{}" at {}\n\n{}\'s comments: {}'.format(post.title, post_url, cd['name'], cd['comments'])
+            subject = f'{cd["name"]} ({settings.EMAIL_HOST_USER}) recommends you reading "{post.title}"'
+            message = f'Read "{post.title}" at {post_url}\n\n{cd["name"]}\'s comments: {cd["comments"]}'
             send_mail(subject, message, settings.EMAIL_HOST_USER, [cd['to']])
             sent = True
     else:

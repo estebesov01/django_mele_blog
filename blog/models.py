@@ -2,6 +2,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth.models import User
+from taggit.managers import TaggableManager
 
 
 class DraftManager(models.Manager):
@@ -45,6 +46,7 @@ class Post(models.Model):
             self.publish.day,
             self.slug,
         ])
+    tags = TaggableManager()
 
 
 class Comment(models.Model):
@@ -60,4 +62,4 @@ class Comment(models.Model):
         ordering = ('created',)
 
     def __str__(self):
-        return 'Comment by {} on {}'.format(self.name, self.post)
+        return f'Comment by {self.name} on {self.post}'
