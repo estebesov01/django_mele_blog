@@ -51,15 +51,23 @@ class Post(models.Model):
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
-    name = models.CharField(max_length=80)
-    email = models.EmailField()
-    body = models.TextField()
+    name = models.CharField('Имя', max_length=80)
+    email = models.EmailField('Почта')
+    body = models.TextField('Комментарии')
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=True)
 
     class Meta:
         ordering = ('created',)
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
 
     def __str__(self):
         return f'Comment by {self.name} on {self.post}'
+
+
+class EmailPost(models.Model):
+    name = models.CharField('Автор', max_length=25)
+    to = models.EmailField('Почта друга')
+    comments = models.TextField('Комментарии')

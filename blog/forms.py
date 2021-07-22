@@ -1,11 +1,11 @@
 from django import forms
-from .models import Comment
+from .models import Comment, EmailPost
 
 
-class EmailPostForm(forms.Form):
-    name = forms.CharField(max_length=25)
-    to = forms.EmailField()
-    comments = forms.CharField(required=False, widget=forms.Textarea)
+class EmailPostForm(forms.ModelForm):
+    class Meta:
+        model = EmailPost
+        fields = ('name', 'to', 'comments')
 
 
 class CommentForm(forms.ModelForm):
